@@ -1,1 +1,0 @@
-export default function Home(){return <main className="min-h-screen grid place-items-center p-6 text-center"><div><img src="/logo.jpeg" alt="Rusdi Furniture" className="w-64 max-w-full mx-auto"/><p className="font-serif text-2xl mt-6 text-lgold">Website sedang dibangun</p></div></main>}
