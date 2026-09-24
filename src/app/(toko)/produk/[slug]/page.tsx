@@ -1,3 +1,4 @@
+import AddToCart from "@/components/AddToCart";
 import { notFound } from "next/navigation";
 import { db, rp, wa, getSettings } from "@/lib/db";
 export const dynamic = "force-dynamic";
@@ -35,8 +36,3 @@ export default async function Detail({ params }: { params: { slug: string } }) {
         <p className="text-sm mt-2 text-silver">Status: {p.stock_status || "tersedia"}</p>
         {p.description && <p className="mt-4 text-sm text-silver whitespace-pre-line">{p.description}</p>}
         {spec.length > 0 && <dl className="mt-5 text-sm grid grid-cols-3 gap-y-2">{spec.map(([k, v]) => <><dt key={k} className="text-gold">{k}</dt><dd key={k + v} className="col-span-2">{v}</dd></>)}</dl>}
-        <a href={wa(s.whatsapp, msg)} className="block text-center bg-gold text-ink font-semibold py-3 rounded mt-6">BELI / PESAN VIA WHATSAPP</a>
-      </div>
-    </div>
-  );
-}
