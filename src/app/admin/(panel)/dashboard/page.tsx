@@ -1,0 +1,1 @@
+export default function D(){return <main className="p-6"><h1 className="font-serif text-2xl text-lgold">Dashboard Admin</h1><p className="mt-2 text-silver">Login berhasil. Fitur admin dibangun di tahap berikutnya.</p></main>}
