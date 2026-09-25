@@ -4,7 +4,7 @@ export default function GallerySection({ items }: { items: { id: string; image_u
   const [open, setOpen] = useState<string | null>(null);
   if (items.length === 0) return null;
   return (
-    <section className="max-w-6xl mx-auto px-4 pt-16">
+    <section id="galeri" className="max-w-6xl mx-auto px-4 pt-16">
       <h2 className="font-serif text-2xl md:text-3xl text-lgold text-center">Galeri Rusdi Furniture</h2>
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-8">
         {items.map((g) => (
