@@ -1,0 +1,13 @@
+{
+  "appId": "com.rusdifuniture.toko",
+  "appName": "Rusdi Furniture",
+  "webDir": "www",
+  "server": {
+    "url": "https://rusdifuniture.vercel.app/",
+    "androidScheme": "https",
+    "cleartext": false
+  },
+  "android": {
+    "allowMixedContent": false
+  }
+}

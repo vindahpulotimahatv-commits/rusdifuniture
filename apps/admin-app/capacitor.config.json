@@ -1,0 +1,13 @@
+{
+  "appId": "com.rusdifuniture.admin",
+  "appName": "Rusdi Furniture Admin",
+  "webDir": "www",
+  "server": {
+    "url": "https://rusdifuniture.vercel.app/admin",
+    "androidScheme": "https",
+    "cleartext": false
+  },
+  "android": {
+    "allowMixedContent": false
+  }
+}
