@@ -10,6 +10,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/toko-app
     steps:
       - uses: actions/checkout@v4
 
@@ -18,15 +21,22 @@ jobs:
           node-version: 20
 
       - name: Install dependencies
-        working-directory: apps/toko-app
         run: npm install
 
       - name: Add Android platform
-        working-directory: apps/toko-app
         run: npx cap add android
 
+      - name: Generate app icon from logo
+        run: npx @capacitor/assets generate --android --iconBackgroundColor "#0B0B0B" --iconBackgroundColorDark "#0B0B0B" --assetPath assets
+
+      - name: Install custom splash screens (portrait & landscape)
+        run: |
+          mkdir -p android/app/src/main/res/drawable-port-xxhdpi
+          mkdir -p android/app/src/main/res/drawable-land-xxhdpi
+          cp assets/splash-port.png android/app/src/main/res/drawable-port-xxhdpi/splash.png
+          cp assets/splash-land.png android/app/src/main/res/drawable-land-xxhdpi/splash.png
+
       - name: Sync Capacitor
-        working-directory: apps/toko-app
         run: npx cap sync android
 
       - uses: actions/setup-java@v4
@@ -35,12 +45,10 @@ jobs:
           java-version: "17"
 
       - name: Grant execute permission for gradlew
-        working-directory: apps/toko-app/android
-        run: chmod +x gradlew
+        run: chmod +x android/gradlew
 
       - name: Build debug APK
-        working-directory: apps/toko-app/android
-        run: ./gradlew assembleDebug
+        run: cd android && ./gradlew assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
