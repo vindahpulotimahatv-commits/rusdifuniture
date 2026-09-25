@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase-browser";
 import { uploadImage } from "@/lib/upload";
 import Toast from "@/components/admin/Toast";
-const fields: [string, string][] = [["store_name", "Nama Toko"], ["subtitle", "Subjudul"], ["tagline", "Tagline"], ["whatsapp", "Nomor WhatsApp (62...)"], ["instagram", "Instagram"], ["facebook", "Facebook"], ["email", "Email"], ["address", "Alamat"], ["hours", "Jam Operasional"], ["maps_url", "Google Maps (URL)"], ["copyright", "Copyright Footer"]];
+const fields: [string, string][] = [["store_name", "Nama Toko"], ["subtitle", "Subjudul"], ["tagline", "Tagline"], ["whatsapp", "Nomor WhatsApp (62...)"], ["instagram", "Instagram"], ["facebook", "Facebook"], ["tiktok", "TikTok"], ["youtube", "YouTube"], ["email", "Email"], ["address", "Alamat"], ["hours", "Jam Operasional"], ["maps_url", "Google Maps (URL)"], ["copyright", "Copyright Footer"]];
 export default function Pengaturan() {
   const sb = supabase();
   const [v, setV] = useState<Record<string, string>>({});
