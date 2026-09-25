@@ -1,0 +1,49 @@
+name: Build Admin APK
+
+on:
+  push:
+    paths:
+      - "apps/admin-app/**"
+      - ".github/workflows/build-admin-apk.yml"
+  workflow_dispatch: {}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        working-directory: apps/admin-app
+        run: npm install
+
+      - name: Add Android platform
+        working-directory: apps/admin-app
+        run: npx cap add android
+
+      - name: Sync Capacitor
+        working-directory: apps/admin-app
+        run: npx cap sync android
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Grant execute permission for gradlew
+        working-directory: apps/admin-app/android
+        run: chmod +x gradlew
+
+      - name: Build debug APK
+        working-directory: apps/admin-app/android
+        run: ./gradlew assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: admin-app-debug-apk
+          path: apps/admin-app/android/app/build/outputs/apk/debug/app-debug.apk
