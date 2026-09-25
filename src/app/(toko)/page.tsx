@@ -1,25 +1,25 @@
 import Link from "next/link";
 import { db, wa, getSettings } from "@/lib/db";
 import ProductCard from "@/components/ProductCard";
+import HeroSlider from "@/components/HeroSlider";
+import GallerySection from "@/components/GallerySection";
+import TestimonialSection from "@/components/TestimonialSection";
 export const revalidate = 30;
 export default async function Home() {
   const s = await getSettings();
-  const { data: cats } = await db().from("categories").select("*").eq("is_active", true).order("sort_order");
-  const { data: all } = await db().from("products").select("category_id").eq("is_active", true);
-  const { data: feat } = await db().from("products").select("*").eq("is_active", true).eq("is_featured", true).limit(8);
+  const [{ data: cats }, { data: all }, { data: feat }, { data: banners }, { data: gallery }, { data: testi }] = await Promise.all([
+    db().from("categories").select("*").eq("is_active", true).order("sort_order"),
+    db().from("products").select("category_id").eq("is_active", true),
+    db().from("products").select("*").eq("is_active", true).eq("is_featured", true).limit(8),
+    db().from("banners").select("*").eq("type", "hero").eq("is_active", true).order("sort_order"),
+    db().from("gallery").select("id,image_url,title").eq("is_active", true).order("id", { ascending: false }).limit(6),
+    db().from("testimonials").select("id,name,rating,comment,photo_url").eq("is_active", true).order("created_at", { ascending: false }).limit(6),
+  ]);
   const count = (id: string) => (all || []).filter((p: any) => p.category_id === id).length;
   const feats = [["PENGIRIMAN AMAN", "Ke seluruh Indonesia"], ["PRODUK BERKUALITAS", "Pilihan terbaik & tahan lama"], ["KONSULTASI GRATIS", "Kami siap membantu"], ["CUSTOM FURNITURE", "Sesuai ukuran & kebutuhan Anda"]];
   return (
     <>
-      <section className="relative bg-gradient-to-b from-charcoal to-ink py-20 md:py-32 text-center px-4">
-        <p className="text-gold tracking-[0.3em] text-xs md:text-sm">RUSDI FURNITURE · CUSTOM BEKASI</p>
-        <h1 className="font-serif text-3xl md:text-6xl mt-4 leading-tight">Furniture Berkualitas<br />untuk Rumah Impian Anda</h1>
-        <p className="max-w-2xl mx-auto mt-5 text-silver text-sm md:text-base">Kami menyediakan berbagai pilihan furniture modern dan custom untuk ruang tamu, kamar tidur, ruang makan, kitchen set, hingga kebutuhan kantor.</p>
-        <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
-          <Link href="/produk" className="bg-gold text-ink font-semibold px-7 py-3 rounded">BELANJA SEKARANG</Link>
-          <a href={wa(s.whatsapp, "Halo Rusdi Furniture, saya ingin konsultasi.")} className="border border-gold text-gold px-7 py-3 rounded">KONSULTASI VIA WHATSAPP</a>
-        </div>
-      </section>
+      <HeroSlider banners={(banners || []) as any} num={s.whatsapp} />
       <section id="kategori" className="max-w-6xl mx-auto px-4 pt-16">
         <h2 className="font-serif text-2xl md:text-3xl text-lgold text-center">Kategori Produk</h2>
         <p className="text-center text-silver text-sm mt-2">Temukan furniture sesuai kebutuhan Anda</p>
@@ -46,6 +46,8 @@ export default async function Home() {
       <section className="max-w-6xl mx-auto px-4 pt-16 grid grid-cols-2 md:grid-cols-4 gap-4">
         {feats.map(([t, d]) => <div key={t} className="text-center p-4 border border-gold/20 rounded-xl"><p className="text-gold text-sm font-semibold">{t}</p><p className="text-xs text-silver mt-1">{d}</p></div>)}
       </section>
+      <GallerySection items={(gallery || []) as any} />
+      <TestimonialSection items={(testi || []) as any} />
     </>
   );
 }
