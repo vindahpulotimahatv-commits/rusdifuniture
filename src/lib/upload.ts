@@ -15,3 +15,12 @@ export async function uploadImage(f: File, folder: string) {
   if (error) throw error;
   return sb.storage.from("images").getPublicUrl(path).data.publicUrl;
 }
+// Video diasumsikan sudah dalam format final (sudah dikonversi/dikompres), jadi diunggah apa adanya tanpa diproses ulang.
+export async function uploadVideo(f: File, folder: string) {
+  const ext = (f.name.split(".").pop() || "mp4").toLowerCase();
+  const path = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+  const sb = supabase();
+  const { error } = await sb.storage.from("videos").upload(path, f, { contentType: f.type || "video/mp4" });
+  if (error) throw error;
+  return sb.storage.from("videos").getPublicUrl(path).data.publicUrl;
+}
