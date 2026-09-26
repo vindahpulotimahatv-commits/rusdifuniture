@@ -9,6 +9,7 @@ const nav: [string, string][] = [
   ["Promo", "/produk?promo=1"],
   ["Galeri", "/#galeri"],
   ["Tentang Kami", "/tentang-kami"],
+  ["Karir", "/karir"],
   ["Kontak", "/kontak"],
 ];
 

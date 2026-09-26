@@ -3,7 +3,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { supabase } from "@/lib/supabase-browser";
-const menu: [string, string][] = [["Dashboard", "/admin/dashboard"], ["Produk", "/admin/produk"], ["Kategori", "/admin/kategori"], ["Pesanan", "/admin/pesanan"], ["Promo", "/admin/promo"], ["Banner", "/admin/banner"], ["Galeri", "/admin/galeri"], ["Testimoni", "/admin/testimoni"], ["Pengaturan", "/admin/pengaturan"]];
+const menu: [string, string][] = [["Dashboard", "/admin/dashboard"], ["Produk", "/admin/produk"], ["Kategori", "/admin/kategori"], ["Pesanan", "/admin/pesanan"], ["Karir", "/admin/karir"], ["Promo", "/admin/promo"], ["Banner", "/admin/banner"], ["Galeri", "/admin/galeri"], ["Testimoni", "/admin/testimoni"], ["Pengaturan", "/admin/pengaturan"]];
 export default function PanelLayout({ children }: { children: React.ReactNode }) {
   const p = usePathname();
   const [open, setOpen] = useState(false);

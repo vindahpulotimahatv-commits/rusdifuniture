@@ -24,3 +24,12 @@ export async function uploadVideo(f: File, folder: string) {
   if (error) throw error;
   return sb.storage.from("videos").getPublicUrl(path).data.publicUrl;
 }
+// Dokumen umum (CV lamaran kerja, dll) — diunggah apa adanya ke bucket "cv".
+export async function uploadDoc(f: File, folder: string) {
+  const ext = (f.name.split(".").pop() || "pdf").toLowerCase();
+  const path = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+  const sb = supabase();
+  const { error } = await sb.storage.from("cv").upload(path, f, { contentType: f.type || "application/pdf" });
+  if (error) throw error;
+  return sb.storage.from("cv").getPublicUrl(path).data.publicUrl;
+}
