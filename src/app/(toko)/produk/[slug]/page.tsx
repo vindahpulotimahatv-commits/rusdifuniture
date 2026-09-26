@@ -27,6 +27,12 @@ export default async function Detail({ params }: { params: { slug: string } }) {
           {photos[0] ? <img src={photos[0]} alt={p.name} className="w-full h-full object-cover" /> : <span className="text-gold/40 font-serif text-4xl">RF</span>}
         </div>
         {photos.length > 1 && <div className="flex gap-2 mt-3 overflow-x-auto">{photos.map((u) => <img key={u} src={u} alt="" loading="lazy" className="h-20 w-20 object-cover rounded border border-gold/30" />)}</div>}
+        {p.video_url && (
+          <div className="mt-4">
+            <p className="text-xs text-gold mb-2">Video Produk</p>
+            <video src={p.video_url} controls playsInline className="w-full rounded-xl border border-gold/30 bg-charcoal" />
+          </div>
+        )}
       </div>
       <div>
         {p.badge && <span className="bg-gold text-ink text-xs font-semibold px-2 py-1 rounded">{p.badge}</span>}
