@@ -1,9 +1,9 @@
 "use client";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase-browser";
-import { uploadImage } from "@/lib/upload";
+import { uploadImage, uploadVideo } from "@/lib/upload";
 const slugify = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-const empty: any = { name: "", slug: "", code: "", category_id: "", subcategory: "", price: "", promo_price: "", stock: "0", stock_status: "tersedia", badge: "", description: "", material: "", size: "", color: "", weight: "", rating: "0", review_count: "0", is_featured: false, is_active: true, main_image: "" };
+const empty: any = { name: "", slug: "", code: "", category_id: "", subcategory: "", price: "", promo_price: "", stock: "0", stock_status: "tersedia", badge: "", description: "", material: "", size: "", color: "", weight: "", rating: "0", review_count: "0", is_featured: false, is_active: true, main_image: "", video_url: "" };
 const rp = (n: number) => "Rp " + Number(n).toLocaleString("id-ID");
 export default function Produk() {
   const sb = supabase();
@@ -13,6 +13,8 @@ export default function Produk() {
   const [gal, setGal] = useState<any[]>([]);
   const [files, setFiles] = useState<File[]>([]);
   const [main, setMain] = useState<File | null>(null);
+  const [video, setVideo] = useState<File | null>(null);
+  const [vidBusy, setVidBusy] = useState(false);
   const [toast, setToast] = useState("");
   const [busy, setBusy] = useState(false);
   const [ld, setLd] = useState(true);
@@ -23,7 +25,7 @@ export default function Produk() {
   };
   useEffect(() => { load(); }, []);
   const open = async (p: any | null) => {
-    setMain(null); setFiles([]); setGal([]);
+    setMain(null); setFiles([]); setGal([]); setVideo(null);
     setF(p ? { ...empty, ...p } : { ...empty });
     if (p) { const { data } = await sb.from("product_images").select("*").eq("product_id", p.id).order("sort_order"); setGal(data || []); }
   };
@@ -33,15 +35,17 @@ export default function Produk() {
     try {
       let img = f.main_image || null;
       if (main) img = await uploadImage(main, "produk");
+      let vid = f.video_url || null;
+      if (video) { setVidBusy(true); vid = await uploadVideo(video, "produk"); setVidBusy(false); }
       const num = (x: any) => (x === "" || x == null ? null : Number(x));
-      const row = { name: f.name, slug: f.slug || slugify(f.name), code: f.code || null, category_id: f.category_id || null, subcategory: f.subcategory || null, price: Number(f.price), promo_price: num(f.promo_price), stock: Number(f.stock) || 0, stock_status: f.stock_status, badge: f.badge || null, description: f.description || null, material: f.material || null, size: f.size || null, color: f.color || null, weight: f.weight || null, rating: Number(f.rating) || 0, review_count: Number(f.review_count) || 0, is_featured: !!f.is_featured, is_active: !!f.is_active, main_image: img };
+      const row = { name: f.name, slug: f.slug || slugify(f.name), code: f.code || null, category_id: f.category_id || null, subcategory: f.subcategory || null, price: Number(f.price), promo_price: num(f.promo_price), stock: Number(f.stock) || 0, stock_status: f.stock_status, badge: f.badge || null, description: f.description || null, material: f.material || null, size: f.size || null, color: f.color || null, weight: f.weight || null, rating: Number(f.rating) || 0, review_count: Number(f.review_count) || 0, is_featured: !!f.is_featured, is_active: !!f.is_active, main_image: img, video_url: vid };
       let id = f.id;
       if (id) { const r = await sb.from("products").update(row).eq("id", id); if (r.error) throw r.error; }
       else { const r = await sb.from("products").insert(row).select("id").single(); if (r.error) throw r.error; id = r.data.id; }
       for (const file of files) { const url = await uploadImage(file, "produk"); await sb.from("product_images").insert({ product_id: id, url }); }
       say(f.id ? "Produk berhasil diperbarui." : "Produk berhasil ditambahkan.");
       setF(null); load();
-    } catch (e: any) { say("Gagal menyimpan: " + (e.message || "coba lagi")); }
+    } catch (e: any) { say("Gagal menyimpan: " + (e.message || "coba lagi")); setVidBusy(false); }
     setBusy(false);
   };
   const toggle = async (p: any) => { await sb.from("products").update({ is_active: !p.is_active }).eq("id", p.id); say(p.is_active ? "Produk dinonaktifkan." : "Produk diaktifkan."); load(); };
@@ -64,7 +68,7 @@ export default function Produk() {
             <div key={p.id} className="bg-charcoal border border-gold/30 rounded-xl p-3 flex gap-3">
               <div className="w-16 h-16 bg-ink rounded overflow-hidden shrink-0">{p.main_image && <img src={p.main_image} alt="" className="w-full h-full object-cover" />}</div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">{p.name} {!p.is_active && <span className="text-xs text-silver">(nonaktif)</span>}</p>
+                <p className="text-sm font-medium truncate">{p.name} {!p.is_active && <span className="text-xs text-silver">(nonaktif)</span>} {p.video_url && <span className="text-xs text-lgold">🎥 Video</span>}</p>
                 <p className="text-xs text-lgold">{rp(p.promo_price || p.price)} · stok {p.stock}</p>
                 <div className="flex flex-wrap gap-2 mt-2 text-xs">
                   <button onClick={() => open(p)} className="border border-gold/50 text-gold rounded px-2 py-1">Edit</button>
@@ -94,7 +98,17 @@ export default function Produk() {
               <div className="flex gap-2 flex-wrap my-2">{gal.map((g) => <div key={g.id} className="relative"><img src={g.url} alt="" className="h-16 w-16 object-cover rounded" /><button onClick={() => delImg(g)} className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 text-xs">×</button></div>)}</div>
               <input type="file" accept="image/*" multiple onChange={(e) => setFiles(Array.from(e.target.files || []))} className="block mt-1" />
               {files.length > 0 && <p className="mt-1">{files.length} foto akan diunggah saat disimpan.</p>}</div>
-            <button disabled={busy} onClick={save} className="w-full bg-gold text-ink font-semibold py-3 rounded">{busy ? "MENYIMPAN…" : "SIMPAN"}</button>
+            <div className="text-xs text-silver">Video Produk
+              {(video || f.video_url) && (
+                <video src={video ? URL.createObjectURL(video) : f.video_url} controls className="w-full max-h-56 rounded my-2 bg-ink" />
+              )}
+              <input type="file" accept="video/*" onChange={(e) => setVideo(e.target.files?.[0] || null)} className="block mt-1" />
+              <p className="mt-1 text-silver/70">Unggah file video yang sudah dikonversi (format mp4 disarankan). Video akan diunggah saat produk disimpan.</p>
+              {(video || f.video_url) && (
+                <button type="button" onClick={() => { setVideo(null); setF({ ...f, video_url: "" }); }} className="mt-1 border border-red-400/60 text-red-400 rounded px-2 py-1">Hapus Video</button>
+              )}
+              {vidBusy && <p className="mt-1 text-gold">Mengunggah video…</p>}</div>
+            <button disabled={busy} onClick={save} className="w-full bg-gold text-ink font-semibold py-3 rounded">{busy ? (vidBusy ? "MENGUNGGAH VIDEO…" : "MENYIMPAN…") : "SIMPAN"}</button>
           </div></div>)}
     </div>
   );
