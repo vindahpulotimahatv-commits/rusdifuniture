@@ -12,13 +12,18 @@ create table order_items(id uuid primary key default gen_random_uuid(),order_id 
 create table gallery(id uuid primary key default gen_random_uuid(),title text,category text,description text,image_url text,is_active bool default true);
 create table testimonials(id uuid primary key default gen_random_uuid(),name text,photo_url text,rating int default 5,comment text,created_at date default current_date,is_active bool default true);
 create table settings(key text primary key,value text);
+create table job_openings(id uuid primary key default gen_random_uuid(),title text not null,slug text unique not null,department text,location text,employment_type text default 'Penuh Waktu',description text,requirements text,is_active bool default true,created_at timestamptz default now());
+create table job_applications(id uuid primary key default gen_random_uuid(),job_id uuid references job_openings on delete set null,job_title text,full_name text not null,email text,phone text,cover_letter text,cv_url text,status text default 'BARU',created_at timestamptz default now());
 insert into settings values('store_name','RUSDI FURNITURE'),('subtitle','CUSTOM BEKASI'),('tagline','Furniture Berkualitas untuk Rumah Impian Anda'),('whatsapp','6281291064259'),('copyright','© 2026 Rusdi Furniture. All Rights Reserved.');
 -- Keamanan (RLS): publik hanya boleh baca, admin boleh semua
 do $$ declare t text; begin
- foreach t in array array['categories','products','product_images','banners','promos','promo_products','gallery','testimonials','settings','orders','order_items','admins'] loop
+ foreach t in array array['categories','products','product_images','banners','promos','promo_products','gallery','testimonials','settings','orders','order_items','admins','job_openings','job_applications'] loop
   execute format('alter table %I enable row level security',t);
   execute format('create policy admin_all on %I for all using(is_admin()) with check(is_admin())',t);
-  if t not in ('orders','order_items','admins') then execute format('create policy public_read on %I for select using(true)',t); end if;
+  if t not in ('orders','order_items','admins','job_applications') then execute format('create policy public_read on %I for select using(true)',t); end if;
  end loop; end $$;
 create policy public_order on orders for insert with check(true);
 create policy public_order_items on order_items for insert with check(true);
+create policy public_apply on job_applications for insert with check(true);
+-- Catatan: buat juga storage bucket "images" (untuk foto), "videos" (untuk video produk, lihat migration_video_produk.sql),
+-- dan "cv" (untuk lamaran karir, lihat migration_karir.sql) di Supabase > Storage, masing-masing diset Public.
